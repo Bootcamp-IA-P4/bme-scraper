@@ -41,7 +41,7 @@ def wait_for_body(driver):
         driver.quit()
         exit()
 
-def get_urls(driver):
+def get_company_urls(driver):
     # Instance links
     links = driver.find_elements(By.XPATH, '//table[contains(@class, "table")]/tbody/tr/td[1]/a')
     # Browse and get links
@@ -55,8 +55,6 @@ def get_urls(driver):
                 link_list.append(link)
     except Exception as e:
         print(f"Error with link {link_text}: {e}")
-    
-                      
     return link_list
 
 def view_all(driver):
@@ -70,7 +68,17 @@ def view_all(driver):
         driver.quit()
         exit()
 
-def scrape_companies(driver,links:list):
+def scrape_companies(driver):
+    print(">> Scraping companies <<")
+    url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
+    driver.get(url)
+    #Wait for page to load  completely
+    time.sleep(randint(2, 4)) # Random sleep between 2 and 4 seconds to avoid detection 
+    accept_consent(driver)
+    wait_for_body(driver)
+    view_all(driver)
+    wait_for_table(driver)
+    links = get_company_urls(driver)
     # Connect to db
     connection = db_connect()
     for i in range(len(links)):
@@ -80,6 +88,8 @@ def scrape_companies(driver,links:list):
         driver.back()
         time.sleep(randint(2, 4)) # Random sleep between 2 and 4 seconds to avoid detection
     connection.close()
+    print(">> Finished scraping companies <<")
+    return
 
 def scrape_company_data_by_id(driver):
     # Wait for the divs to load
