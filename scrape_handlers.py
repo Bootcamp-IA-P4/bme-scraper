@@ -2,20 +2,11 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from load_dotenv import load_dotenv
 import time
 from random import randint
-import os
-import sqlite3
 from entities import Company
-import logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='myapp.log', level=logging.INFO)
-logger.info('Started')
+from db_manager import db_connect, save_company
 
-load_dotenv()
-DEBUG_MODE = False
-DEBUG_MODE = os.getenv("DEBUG_MODE")
 
 
 def parse_money(money:str):
@@ -85,13 +76,12 @@ def scrape_companies(driver,links:list):
     for i in range(len(links)):
         url = links[i][1]
         driver.get(url)
-        save_company(get_company_data_by_id(driver),connection)
+        save_company(scrape_company_data_by_id(driver),connection)
         driver.back()
         time.sleep(randint(2, 4)) # Random sleep between 2 and 4 seconds to avoid detection
     connection.close()
 
-
-def get_company_data_by_id(driver):
+def scrape_company_data_by_id(driver):
     # Wait for the divs to load
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "details-table.horizontalCompanyInfo")))
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "details-table.horizontal")))
@@ -125,44 +115,4 @@ def get_company_data_by_id(driver):
     )
     return company
 
-def db_connect():
-    # Connect to database
-    try:
-        connection = sqlite3.connect("bme.db")
-        return connection
-    except Exception as e:
-        print(f"Error connecting to database: {e}")
-        return None
 
-
-def save_company(company,connection):
-    cursor = connection.cursor()
-    # Create table if not exists
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS company (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name varchar(50),
-            isin char(12),
-            ticker varchar(4),
-            nominal float,
-            market varchar(50),
-            listed_capital float,
-            address varchar(50)
-        )
-    """)
-    connection.commit()
-    # Check if company already exists, by ISIN
-    cursor.execute("SELECT COUNT(*) FROM company WHERE isin = ?", (company.isin,))
-    result = cursor.fetchone()[0]
-    if result > 0:
-        print(f"Company {company.name} already exists in database")
-        return
-    else:
-        # Insert data
-        cursor.execute("""
-            INSERT INTO company (name, isin, ticker, nominal, market, listed_capital, address)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (company.name, company.isin, company.ticker, company.nominal, company.market, company.listed_capital, company.address))
-        connection.commit()
-
-logger.info('Finished')

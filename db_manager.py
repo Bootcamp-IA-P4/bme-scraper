@@ -1,0 +1,47 @@
+import sqlite3
+import os
+from dotenv import load_dotenv
+load_dotenv()
+def db_connect():
+    # Connect to database
+    try:
+        connection = sqlite3.connect(os.getenv("DB_NAME"))
+        try:
+            create_tables(connection)
+        except Exception as e:
+            print(f"Error creating tables: {e}")
+            return None
+        return connection
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        return None
+def create_tables(connection):
+        cursor = connection.cursor()
+        # Create table company if not exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS company (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name varchar(50),
+                isin char(12),
+                ticker varchar(4),
+                nominal float,
+                market varchar(50),
+                listed_capital float,
+                address varchar(50)
+            )
+        """)
+        connection.commit()
+def save_company(company,connection):
+    cursor = connection.cursor()
+    # Check if company already exists, by ISIN
+    cursor.execute("SELECT COUNT(*) FROM company WHERE isin = ?", (company.isin,))
+    result = cursor.fetchone()[0]
+    if result > 0:
+        print(f"Company {company.name} already exists in database")
+        return
+    else: # Insert data
+        cursor.execute("""
+            INSERT INTO company (name, isin, ticker, nominal, market, listed_capital, address)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (company.name, company.isin, company.ticker, company.nominal, company.market, company.listed_capital, company.address))
+        connection.commit()
