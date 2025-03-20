@@ -6,22 +6,20 @@ from load_dotenv import load_dotenv
 import time
 from random import randint
 import os
-import json
 import sqlite3
+from entities import Company
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='myapp.log', level=logging.INFO)
+logger.info('Started')
 
 load_dotenv()
 DEBUG_MODE = False
 DEBUG_MODE = os.getenv("DEBUG_MODE")
 
-company_dict = {
-"name":"lbl-details-2-1",
-"isin":"lbl-details-2-2",
-"ticker":"lbl-details-2-3",
-"nominal":"lbl-details-2-4",
-"market":"lbl-details-2-5",
-"admitted_capital":"lbl-details-2-6",
-"address":"lbl-details-1-2"
-}
+
+def parse_money(money:str):
+    return float(money.replace("€","").replace(".","").replace(",",".").replace(" ","").upper().replace("EUROS",""))
 
 def accept_consent(driver):
     try:
@@ -31,7 +29,6 @@ def accept_consent(driver):
         accept_button.click()
     except Exception as e:
         print(f'Error accepting consent: {e}')
-
 
 def wait_for_table(driver):
     try:
@@ -59,8 +56,7 @@ def get_urls(driver):
     # Browse and get links
     link_list = []
     try:
-            #for i in range(len(links)):
-            for i in range(5): # For testing purposes
+            for i in range(len(links)):
                 # Get text and href
                 link_text = links[i].text
                 link_href = links[i].get_attribute("href")
@@ -71,6 +67,7 @@ def get_urls(driver):
     
                       
     return link_list
+
 def view_all(driver):
     try:
         ver_todas = WebDriverWait(driver, 10).until(
@@ -82,29 +79,51 @@ def view_all(driver):
         driver.quit()
         exit()
 
-def browse_companies(driver,links:list):
-    # Browse companies
-    data = []
-    #for i in range(len(links)):
-    for i in range(5): # For testing purposes
+def scrape_companies(driver,links:list):
+    # Connect to db
+    connection = db_connect()
+    for i in range(len(links)):
         url = links[i][1]
         driver.get(url)
-        data.append(get_company_data_by_id(driver))
+        save_company(get_company_data_by_id(driver),connection)
         driver.back()
         time.sleep(randint(2, 4)) # Random sleep between 2 and 4 seconds to avoid detection
-    with open("company_data.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    connection.close()
+
+
 def get_company_data_by_id(driver):
-    elements = []
-    for field, value in company_dict.items():
-        try:
-            WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.ID, value)))
-            element = driver.find_element(By.ID, value)
-            elements.append([field,element.text])
-        except Exception as e:
-            print(f'\nError {e} with field:\n {field} : {value}')
-            return None
-    return elements
+    # Wait for the divs to load
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "details-table.horizontalCompanyInfo")))
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "details-table.horizontal")))
+    # Get the divs
+    company_info = driver.find_element(By.CLASS_NAME, "details-table.horizontalCompanyInfo")
+    company_details = driver.find_element(By.CLASS_NAME, "details-table.horizontal")
+    # Get the labels
+    info_labels = company_info.find_elements(By.TAG_NAME, "label")
+    details_labels = company_details.find_elements(By.TAG_NAME, "label")
+    company_dict = {}
+    for label in info_labels:
+        if label.text.strip() == "Domicilio:":
+            details_labels.append(label)
+            break
+    for label in details_labels:
+         field_id = label.get_attribute("for")  # Return example: lbl-details-2-1
+         span_element = driver.find_element(By.ID, field_id)
+         if label.text.strip() in ("Capital Admitido","Nominal"):
+             field_value = parse_money(span_element.text.strip())
+         else:
+             field_value = span_element.text.strip()
+         company_dict[label.text.strip().replace(":","")] = field_value
+    company = Company(
+    company_dict.get("Nombre", None),
+    company_dict.get("ISIN", None),
+    company_dict.get("Ticker", None),
+    company_dict.get("Nominal", None),
+    company_dict.get("Mercado", None),
+    company_dict.get("Domicilio", None),
+    company_dict.get("Capital Admitido", None)
+    )
+    return company
 
 def db_connect():
     # Connect to database
@@ -115,7 +134,8 @@ def db_connect():
         print(f"Error connecting to database: {e}")
         return None
 
-def save_companies(connection):
+
+def save_company(company,connection):
     cursor = connection.cursor()
     # Create table if not exists
     cursor.execute("""
@@ -126,7 +146,23 @@ def save_companies(connection):
             ticker varchar(4),
             nominal float,
             market varchar(50),
-            addmited_capital float
+            listed_capital float,
+            address varchar(50)
         )
     """)
     connection.commit()
+    # Check if company already exists, by ISIN
+    cursor.execute("SELECT COUNT(*) FROM company WHERE isin = ?", (company.isin,))
+    result = cursor.fetchone()[0]
+    if result > 0:
+        print(f"Company {company.name} already exists in database")
+        return
+    else:
+        # Insert data
+        cursor.execute("""
+            INSERT INTO company (name, isin, ticker, nominal, market, listed_capital, address)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (company.name, company.isin, company.ticker, company.nominal, company.market, company.listed_capital, company.address))
+        connection.commit()
+
+logger.info('Finished')

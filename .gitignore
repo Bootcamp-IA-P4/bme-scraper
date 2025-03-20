@@ -211,5 +211,8 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,django,venv
 
+# logs
+myapp.log
+
 #Under development
 deploy.yml

@@ -37,9 +37,7 @@ def main():
     wait_for_body(driver)
     view_all(driver)
     wait_for_table(driver)
-    browse_companies(driver,links=get_urls(driver))
-    
-    save_companies(db_connect())
+    scrape_companies(driver,links=get_urls(driver))
     driver.quit()
     logger.info('Finished')
 
