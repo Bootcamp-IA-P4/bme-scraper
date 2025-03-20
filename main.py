@@ -35,8 +35,12 @@ def main():
         scrape_companies(driver)
     else:
         print("Companies data not scraped")
-    
-    
+    #Scrape stock values
+    if arguments.all or arguments.stock_values:
+        True
+        #scrape_stock_values(driver)
+    else:
+        print("Stock values not scraped")
     driver.quit() #Close browser
     logger.info('Finished')
 

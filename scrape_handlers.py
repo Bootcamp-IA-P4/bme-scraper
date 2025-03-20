@@ -6,8 +6,9 @@ import time
 from random import randint
 from entities import Company
 from db_manager import db_connect, save_company
+from arguments import argument_parser
 
-
+arguments =argument_parser()
 
 def parse_money(money:str):
     return float(money.replace("€","").replace(".","").replace(",",".").replace(" ","").upper().replace("EUROS",""))
@@ -53,6 +54,8 @@ def get_company_urls(driver):
                 link_href = links[i].get_attribute("href")
                 link = [link_text,link_href]
                 link_list.append(link)
+                if arguments.verbose:
+                    print(f"Link {i}: {link_text} - {link_href}")
     except Exception as e:
         print(f"Error with link {link_text}: {e}")
     return link_list
@@ -123,6 +126,8 @@ def scrape_company_data_by_id(driver):
     company_dict.get("Domicilio", None),
     company_dict.get("Capital Admitido", None)
     )
+    if arguments.verbose:
+        print(f'Company scrapped: {company}')
     return company
 
 

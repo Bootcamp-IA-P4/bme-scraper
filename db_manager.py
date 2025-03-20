@@ -2,6 +2,9 @@ import sqlite3
 import os
 from dotenv import load_dotenv
 load_dotenv()
+from arguments import argument_parser
+arguments = argument_parser()
+
 def db_connect():
     # Connect to database
     try:
@@ -31,12 +34,14 @@ def create_tables(connection):
             )
         """)
         connection.commit()
+        if arguments.verbose:
+            print("Table company created")
 def save_company(company,connection):
     cursor = connection.cursor()
     # Check if company already exists, by ISIN
     cursor.execute("SELECT COUNT(*) FROM company WHERE isin = ?", (company.isin,))
     result = cursor.fetchone()[0]
-    if result > 0:
+    if result > 0 and arguments.verbose:
         print(f"Company {company.name} already exists in database")
         return
     else: # Insert data
@@ -45,3 +50,5 @@ def save_company(company,connection):
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (company.name, company.isin, company.ticker, company.nominal, company.market, company.listed_capital, company.address))
         connection.commit()
+        if arguments.verbose:
+            print(f"Company {company.name} saved in database")
