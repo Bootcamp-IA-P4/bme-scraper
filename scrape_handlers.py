@@ -112,8 +112,8 @@ def scrape_companies(driver):
         driver.back()
         time.sleep(randint(1, 4)) # Random sleep detection
     connection.close()
-    print(f">> Finished scraping of {i} companies <<")
-    logger.info(f"Finished scraping of {i} companies")
+    print(f">> Finished scraping of {i+1} companies <<")
+    logger.info(f"Finished scraping of {i+1} companies")
     return
 
 def scrape_company_data_by_id(driver):
