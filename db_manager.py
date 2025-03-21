@@ -33,9 +33,24 @@ def create_tables(connection):
                 address varchar(50)
             )
         """)
-        connection.commit()
         if arguments.verbose:
             print("Table company created")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS stock_value (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                isin char(12),
+                last float,
+                diff float,
+                max float,
+                min float,
+                volume float,
+                turnover float,
+                updated datetime
+            )
+        """)
+        connection.commit()
+        if arguments.verbose:
+            print("Table stock_value created")
 def save_company(company,connection):
     cursor = connection.cursor()
     # Check if company already exists, by ISIN
@@ -52,3 +67,20 @@ def save_company(company,connection):
         connection.commit()
         if arguments.verbose:
             print(f"Company {company.name} saved in database")
+
+def save_stock_value(stock_value,connection):
+    cursor = connection.cursor()
+    # Check if stock value already exists, by ISIN and updated date
+    cursor.execute("SELECT COUNT(*) FROM stock_value WHERE isin = ? AND updated = ?", (stock_value.isin, stock_value.updated))
+    result = cursor.fetchone()[0]
+    if result > 0 and arguments.verbose:
+        print(f"Stock value {stock_value.isin} already exists in database")
+        return
+    else: # Insert data
+        cursor.execute("""
+            INSERT INTO stock_value (isin, last, diff, max, min, volume, turnover, updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (stock_value.isin, stock_value.last, stock_value.diff, stock_value.max, stock_value.min, stock_value.volume, stock_value.turnover, stock_value.updated))
+        connection.commit()
+        if arguments.verbose:
+            print(f"Stock value {stock_value.isin} saved in database")

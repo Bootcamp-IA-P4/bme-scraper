@@ -4,15 +4,25 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import time
 from random import randint
-from entities import Company
-from db_manager import db_connect, save_company
+from entities import Company, StockValue
+from db_manager import db_connect, save_company, save_stock_value
 from arguments import argument_parser
+from datetime import datetime
+
 
 arguments =argument_parser()
 
 def parse_money(money:str):
-    return float(money.replace("€","").replace(".","").replace(",",".").replace(" ","").upper().replace("EUROS",""))
+    return float(money.replace("€","").replace(".","").replace(",",".").replace(" ","").upper().replace("EUROS","").replace("-","0"))
 
+def parse_updated(update_date:str, update_time:str):
+    try:
+        if update_time == "Cierre":
+            update_time = "23:59:59"
+        updated = update_date + " " + update_time
+        return datetime.strptime(updated, "%d/%m/%Y %H:%M:%S")
+    except Exception as e:
+        return None
 def accept_consent(driver):
     try:
         accept_button = WebDriverWait(driver, 5).until(
@@ -42,7 +52,7 @@ def wait_for_body(driver):
         driver.quit()
         exit()
 
-def get_company_urls(driver):
+def get_urls(driver):
     # Instance links
     links = driver.find_elements(By.XPATH, '//table[contains(@class, "table")]/tbody/tr/td[1]/a')
     # Browse and get links
@@ -76,12 +86,12 @@ def scrape_companies(driver):
     url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
     driver.get(url)
     #Wait for page to load  completely
-    time.sleep(randint(2, 4)) # Random sleep between 2 and 4 seconds to avoid detection 
+    time.sleep(randint(1, 4)) # Random sleep to avoid detection 
     accept_consent(driver)
     wait_for_body(driver)
     view_all(driver)
     wait_for_table(driver)
-    links = get_company_urls(driver)
+    links = get_urls(driver)
     # Connect to db
     connection = db_connect()
     for i in range(len(links)):
@@ -89,9 +99,9 @@ def scrape_companies(driver):
         driver.get(url)
         save_company(scrape_company_data_by_id(driver),connection)
         driver.back()
-        time.sleep(randint(2, 4)) # Random sleep between 2 and 4 seconds to avoid detection
+        time.sleep(randint(1, 4)) # Random sleep detection
     connection.close()
-    print(">> Finished scraping companies <<")
+    print(f">> Finished scraping of {i} companies <<")
     return
 
 def scrape_company_data_by_id(driver):
@@ -130,4 +140,62 @@ def scrape_company_data_by_id(driver):
         print(f'Company scrapped: {company}')
     return company
 
+
+def scrape_stock_values(driver):
+    print(">> Scraping stock values <<")
+    url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
+    driver.get(url)
+    #Wait for page to load  completely
+    time.sleep(randint(1, 4)) # Random sleep to avoid detection 
+    accept_consent(driver)
+    wait_for_body(driver)
+    view_all(driver)
+    wait_for_table(driver)
+    rows = driver.find_elements(By.XPATH, '//table[contains(@class, "table")]/tbody/tr')
+    connection = db_connect()
+    i = 0
+    for row in rows:
+        i += 1
+        columns = row.find_elements(By.TAG_NAME, "td")
+        data_row = []
+        for col in columns:
+            href_element = col.find_element(By.TAG_NAME, "a") if col.find_elements(By.TAG_NAME, "a") else None
+
+            if href_element:
+                href = href_element.get_attribute("href")  # URL
+                data_row.insert(0,href[-12:])  # Insert ISIN at the beginning
+            else:
+                data_row.append(col.text.strip())  # Si no hay enlace, guardar solo el texto
+        if len(data_row) == 8:
+            stock = StockValue(
+                data_row[0],
+                parse_money(data_row[1]),
+                parse_money(data_row[2].replace("%","")),
+                parse_money(data_row[3]),
+                parse_money(data_row[4]),
+                parse_money(data_row[5]),
+                parse_money(data_row[6])
+            )
+        else:
+            stock = StockValue(
+                data_row[0],
+                parse_money(data_row[1]),
+                parse_money(data_row[2].replace("%","")),
+                parse_money(data_row[3]),
+                parse_money(data_row[4]),
+                parse_money(data_row[5]),
+                parse_money(data_row[6]),
+                parse_updated(data_row[7],data_row[8]),
+        )
+        if arguments.verbose:
+            print(f'Stock scrapped: {stock.__str__()}')
+
+        
+        save_stock_value(stock,connection)
+        
+
+        time.sleep(randint(1, 4)) # Random sleep to avoid detection 
+    connection.close()
+    print(f">> Finished scraping of {i} stock values<<")
+    return
 
