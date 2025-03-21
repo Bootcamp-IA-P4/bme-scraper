@@ -214,5 +214,6 @@ $RECYCLE.BIN/
 # logs
 myapp.log
 
-#Under development
-deploy.yml
+#Database
+bme.db
+dump.sql
