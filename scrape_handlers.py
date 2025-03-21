@@ -8,7 +8,9 @@ from entities import Company, StockValue
 from db_manager import db_connect, save_company, save_stock_value
 from arguments import argument_parser
 from datetime import datetime
-
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='myapp.log', level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",)
 
 arguments =argument_parser()
 
@@ -31,6 +33,9 @@ def accept_consent(driver):
         accept_button.click()
     except Exception as e:
         print(f'Error accepting consent: {e}')
+        logger.error(f'Error accepting consent: {e}')
+        driver.quit()
+        exit()
 
 def wait_for_table(driver):
     try:
@@ -39,6 +44,7 @@ def wait_for_table(driver):
         )
     except Exception as e:
         print("Table not found:", e)
+        logger.error(f"Table not found: {e}")
         driver.quit()
         exit()
 
@@ -49,6 +55,7 @@ def wait_for_body(driver):
         )
     except Exception as e:
         print("BODY not found at:", e)
+        logger.error(f"BODY not found at: {e}")
         driver.quit()
         exit()
 
@@ -68,6 +75,9 @@ def get_urls(driver):
                     print(f"Link {i}: {link_text} - {link_href}")
     except Exception as e:
         print(f"Error with link {link_text}: {e}")
+        logger.error(f"Error with link {link_text}: {e}")
+        driver.quit()
+        exit()
     return link_list
 
 def view_all(driver):
@@ -78,6 +88,7 @@ def view_all(driver):
         driver.execute_script("arguments[0].click();", ver_todas)
     except Exception as e:
         print(f'Error clicking "Ver todas": {e}')
+        logger.error(f'Error clicking "Ver todas": {e}')
         driver.quit()
         exit()
 
@@ -102,6 +113,7 @@ def scrape_companies(driver):
         time.sleep(randint(1, 4)) # Random sleep detection
     connection.close()
     print(f">> Finished scraping of {i} companies <<")
+    logger.info(f"Finished scraping of {i} companies")
     return
 
 def scrape_company_data_by_id(driver):
@@ -197,5 +209,6 @@ def scrape_stock_values(driver):
         time.sleep(randint(1, 4)) # Random sleep to avoid detection 
     connection.close()
     print(f">> Finished scraping of {i} stock values<<")
+    logger.info(f"Finished scraping of {i} stock values")
     return
 
