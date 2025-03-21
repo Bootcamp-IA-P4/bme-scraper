@@ -13,8 +13,8 @@ def db_connect():
     try:
         connection = sqlite3.connect(os.getenv("DB_NAME"))
         try:
-            create_tables(connection)
             logger.info('Database connected')
+            create_tables(connection)
         except Exception as e:
             logger.error(f"Error creating tables: {e}")
             print(f"Error creating tables: {e}")
