@@ -9,16 +9,18 @@ from random import randint
 from scrape_handlers import *
 from db_manager import db_connect, db_dump
 import logging
+from utils import clear_console
 logger = logging.getLogger(__name__)
 
 
 
 def main():
-    
+    clear_console()
     arguments =argument_parser()
     validate_arguments(arguments)
     logging.basicConfig(filename='myapp.log', level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",)
     logger.info('START of main program')
+    print('>> SCRAPING DATA FROM BME EXCHANGE\n')
     try:
         if arguments.verbose: #Verbose mode
             logger.info('VERBOSE mode activated')
@@ -51,9 +53,10 @@ def main():
                     driver.quit()
                     logger.info('END of stock values scrape')
                 logger.info('END of scrape')
+        print('\n>> Process finished\n')
         logger.info('END of main program')
     except KeyboardInterrupt:
-        print('>> Process interrupted by user !!!')
+        print('\n>> Process interrupted by user !!!\n')
         logger.info('KeyboardInterrupt')
         exit()
     except Exception as e:

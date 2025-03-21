@@ -7,24 +7,14 @@ from random import randint
 from entities import Company, StockValue
 from db_manager import db_connect, save_company, save_stock_value
 from arguments import argument_parser
-from datetime import datetime
+from utils import parse_money, parse_updated, progress_bar
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='myapp.log', level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",)
 
 arguments =argument_parser()
 
-def parse_money(money:str):
-    return float(money.replace("€","").replace(".","").replace(",",".").replace(" ","").upper().replace("EUROS","").replace("-","0"))
 
-def parse_updated(update_date:str, update_time:str):
-    try:
-        if update_time == "Cierre":
-            update_time = "23:59:59"
-        updated = update_date + " " + update_time
-        return datetime.strptime(updated, "%d/%m/%Y %H:%M:%S")
-    except Exception as e:
-        return None
 def accept_consent(driver):
     try:
         accept_button = WebDriverWait(driver, 5).until(
@@ -65,7 +55,11 @@ def get_urls(driver):
     # Browse and get links
     link_list = []
     try:
+            if arguments.verbose:
+                print(">> Scraping links")
             for i in range(len(links)):
+                if not arguments.verbose:
+                    progress_bar(i+1, len(links),title="Scraping HREFS ")
                 # Get text and href
                 link_text = links[i].text
                 link_href = links[i].get_attribute("href")
@@ -73,6 +67,8 @@ def get_urls(driver):
                 link_list.append(link)
                 if arguments.verbose:
                     print(f"Link {i}: {link_text} - {link_href}")
+            if arguments.verbose:
+                print("\n>> Scraping links finished\n")
     except Exception as e:
         print(f"Error with link {link_text}: {e}")
         logger.error(f"Error with link {link_text}: {e}")
@@ -93,7 +89,8 @@ def view_all(driver):
         exit()
 
 def scrape_companies(driver):
-    print(">> Scraping companies <<")
+    if arguments.verbose:
+        print(">> Scraping companies")
     url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
     driver.get(url)
     #Wait for page to load  completely
@@ -106,13 +103,16 @@ def scrape_companies(driver):
     # Connect to db
     connection = db_connect()
     for i in range(len(links)):
+        if not arguments.verbose:
+            progress_bar(i+1, len(links),title="Scraping companies ")
         url = links[i][1]
         driver.get(url)
         save_company(scrape_company_data_by_id(driver),connection)
         driver.back()
         time.sleep(randint(1, 4)) # Random sleep detection
     connection.close()
-    print(f">> Finished scraping of {i+1} companies <<")
+    if arguments.verbose:
+        print(f">> Finished scraping of {i+1} companies\n")
     logger.info(f"Finished scraping of {i+1} companies")
     return
 
@@ -154,7 +154,8 @@ def scrape_company_data_by_id(driver):
 
 
 def scrape_stock_values(driver):
-    print(">> Scraping stock values <<")
+    if arguments.verbose:
+        print(">> Scraping stock values <<")
     url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
     driver.get(url)
     #Wait for page to load  completely
@@ -167,6 +168,8 @@ def scrape_stock_values(driver):
     connection = db_connect()
     i = 0
     for row in rows:
+        if not arguments.verbose:
+            progress_bar(i, len(rows),title="Scraping stock values ")
         i += 1
         columns = row.find_elements(By.TAG_NAME, "td")
         data_row = []
@@ -201,14 +204,11 @@ def scrape_stock_values(driver):
         )
         if arguments.verbose:
             print(f'Stock scrapped: {stock.__str__()}')
-
-        
+        # Save stock value to db
         save_stock_value(stock,connection)
-        
-
         time.sleep(randint(1, 4)) # Random sleep to avoid detection 
     connection.close()
-    print(f">> Finished scraping of {i} stock values<<")
+    print(f">> Finished scraping of {i} stock values\n")
     logger.info(f"Finished scraping of {i} stock values")
     return
 
