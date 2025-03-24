@@ -1,0 +1,3 @@
+# Run the scraper every day at midnight
+0 8-20 * * 1-5 appuser python3 /app/main.py --scrape --all --wait 5 >> /app/logs/cron.log 2>&1
+

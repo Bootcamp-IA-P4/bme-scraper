@@ -97,7 +97,32 @@ Arguments are divided into two groups: `--scrape` and `--database`, as well as g
    python main.py --database --delete_file # Delete the database file.
    python main.py --database --delete_db # Delete all the data, but keep the database file and table structure.
    ```
+## Docker 🐳
+Dockerfile and docker-compose.yml files are included in the project for containerization.
+Cronjob is set to run the scraper every day from Monday to Friday between 8:00-20:00.
 
+1. Build the Docker image:
+   ```bash
+   docker-compose up --build
+   ```
+2. Run the Docker container:
+   ```bash
+      docker ps # Check the container ID
+   docker exec -it <container_id> bash # Access the container
+   ```
+3. Check the logs:
+   ```bash
+   cat myapp.log
+   ```
+4. Connect to database:
+   ```bash
+   sqlite3 bme.db
+   ```
+5. Select data:
+   ```bash
+   SELECT * FROM companies;
+   SELECT * FROM stock_values;
+   ```
 ## Contributing 🤝
 
 Contributions are welcome! Please fork the repository and submit a pull request.
