@@ -1,6 +1,8 @@
 # BME Scraper
 Author: Fernando García Catalán
+
 Github: https://github.com/fergarcat
+
 Scrum Project: https://github.com/users/fergarcat/projects/2
 
 ## Overview
@@ -11,7 +13,7 @@ This is my second project during the AI Bootcamp at https://github.com/Factoria-
 
 ## Features
 
-- Scrape companies and stock data from the BME website(https://www.bolsasymercados.es/).
+- Scrape companies and stock data from the BME website (https://www.bolsasymercados.es/).
 - Save data to local sqlite database.
 - Configurable scraping options.
 - Dump and deletion options for the database.
@@ -38,6 +40,8 @@ As described in requirements.txt file.
    ```
 4. Rename file in the project directory `.env.example` to `.env`  and set database path and default waiting time in the file.
    ```bash
+   rename .env.example .env
+   ```
 5. Activate the virtual environment:
    ```bash
    .venv/Scripts/activate # For Windows
@@ -55,8 +59,13 @@ As described in requirements.txt file.
    ```
 3. Dump the database to a sql file:
    ```bash
-   python main.py --database --dump 
+   python main.py --database --dump # Dump the database to dump.sql file.
    ```
+4. Delete the database:
+   ```bash
+    python main.py --database --delete_file # Delete the database file.
+    python main.py --database --delete_db # Delete all the data, but keep the database file and table structure.
+    ```
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request.
