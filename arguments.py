@@ -3,12 +3,13 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 wait_time = os.getenv("WAIT_TIME")
+browser_display = os.getenv("BROWSER_DISPLAY")
 
 def argument_parser():
     parser = argparse.ArgumentParser(description='Scrape proyect for BME stock market website.\n\nYou may get all data from scratch or select the scope of the scrape.')
     parser.add_argument('-V', '--verbose', help="Show detailed output for each scrape.", action='store_true',default=False)
     parser.add_argument('-w', '--wait_time', help="Time to wait between requests.", type=int, default=wait_time)
-    parser.add_argument('-b', '--browser', help="Show driver browser.", type=bool, default=False)
+    parser.add_argument('-b', '--browser', help="Show driver browser.", type=bool, default=browser_display)
     #Main group exclusive 
     main_option = parser.add_mutually_exclusive_group(required=True)
     main_option.add_argument('-scr','--scrape', help="Scrape data from the website.", action='store_true',default=False)
