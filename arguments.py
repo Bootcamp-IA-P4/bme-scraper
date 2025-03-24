@@ -15,7 +15,7 @@ def argument_parser():
     main_option = parser.add_mutually_exclusive_group(required=True)
     main_option.add_argument('-scr','--scrape', help="Scrape data from the website.", action='store_true',default=False)
     main_option.add_argument('-db','--database', help="Manage db options.", action='store_true',default=False)
-    main_option.add_argument('-v', '--version', help="Show program version.", action='version', version="BME Scraper v1.0.0_beta")
+    main_option.add_argument('-v', '--version', help="Show program version.", action='version', version="BME Scraper v1.1.0")
     #DB group exclusive
     database = parser.add_mutually_exclusive_group(required=False)
     database.add_argument('-du', '--dump', help="Dump database to file.", action='store_true',default=False)
