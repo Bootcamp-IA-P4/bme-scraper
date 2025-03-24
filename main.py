@@ -23,6 +23,7 @@ def main():
     validate_arguments(arguments)
     logging.basicConfig(filename='myapp.log', level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",)
     logger.info('START of main program')
+    logger.info(f'Selected ARGUMENTS: {arguments.__dict__.items().__str__()}')
     print('*** Wellcome to BME Exchange scraper ***\n')
     try:
         if arguments.verbose: #Verbose mode

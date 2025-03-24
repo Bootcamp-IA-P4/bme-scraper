@@ -1,6 +1,9 @@
 import os
 import sys
 import datetime
+from random import randint
+import time
+
 
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')  # 'cls' para Windows, 'clear' para Linux/macOS
@@ -26,3 +29,10 @@ def parse_updated(update_date:str, update_time:str):
         return datetime.strptime(updated, "%d/%m/%Y %H:%M:%S")
     except Exception as e:
         return None
+
+def wait(t:int):
+    if t == 0:
+        return
+    else:
+        time.sleep(randint(1, t)) # Random sleep to avoid detection
+        return

@@ -3,16 +3,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import time
-from random import randint
 from entities import Company, StockValue
 from db_manager import db_connect, save_company, save_stock_value
 from arguments import argument_parser
-from utils import parse_money, parse_updated, progress_bar
+arguments =argument_parser()
+from utils import parse_money, parse_updated, progress_bar, wait
 import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='myapp.log', level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",)
+wait_time = arguments.wait_time
 
-arguments =argument_parser()
 
 
 def accept_consent(driver):
@@ -94,7 +94,9 @@ def scrape_companies(driver):
     url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
     driver.get(url)
     #Wait for page to load  completely
-    time.sleep(randint(1, 4)) # Random sleep to avoid detection 
+    wait(wait_time) # Random sleep to avoid detection 
+    if arguments.verbose:
+        print(f'>> Waiting {wait_time} seconds to avoid robot detection')
     accept_consent(driver)
     wait_for_body(driver)
     view_all(driver)
@@ -109,7 +111,7 @@ def scrape_companies(driver):
         driver.get(url)
         save_company(scrape_company_data_by_id(driver),connection)
         driver.back()
-        time.sleep(randint(1, 4)) # Random sleep detection
+        wait(wait_time) # Random sleep detection
     connection.close()
     if arguments.verbose:
         print(f">> Finished scraping of {i+1} companies\n")
@@ -159,7 +161,9 @@ def scrape_stock_values(driver):
     url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
     driver.get(url)
     #Wait for page to load  completely
-    time.sleep(randint(1, 4)) # Random sleep to avoid detection 
+    wait(wait_time) # Random sleep to avoid detection
+    if arguments.verbose:
+        print(f'>> Waiting {wait_time} seconds to avoid robot detection') 
     accept_consent(driver)
     wait_for_body(driver)
     view_all(driver)
@@ -206,7 +210,9 @@ def scrape_stock_values(driver):
             print(f'Stock scrapped: {stock.__str__()}')
         # Save stock value to db
         save_stock_value(stock,connection)
-        time.sleep(randint(1, 4)) # Random sleep to avoid detection 
+        wait(wait_time) # Random sleep to avoid detection
+        if arguments.verbose:
+            print(f'>> Waiting {wait_time} seconds to avoid robot detection')
     connection.close()
     print(f">> Finished scraping of {i} stock values\n")
     logger.info(f"Finished scraping of {i} stock values")
