@@ -13,7 +13,7 @@ def progress_bar(i, total, length=50, title=""):
     rounded_percent = round(percent * 100 / 2.5) * 2.5  # Redondea en incrementos de 2.5%
     bar_length = int(length * percent)
     bar = "█" * bar_length + "-" * (length - bar_length)
-    sys.stdout.write(f"\r{title} [{bar}] {rounded_percent:.1f}% of {i} records")  # Muestra un decimal
+    sys.stdout.write(f"\r{title} [{bar}] {rounded_percent:.1f}% of {total} records")  # Muestra un decimal
     sys.stdout.flush()
     if percent == 1:
         print()
