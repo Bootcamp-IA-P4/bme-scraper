@@ -28,27 +28,57 @@ As described in `requirements.txt` file.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/bme-scraper.git
+   git clone https://github.com/fergarcat/bme-scraper
    ```
 2. Navigate to the project directory:
    ```bash
    cd bme-scraper
    ```
-3. Install dependencies:
+3. Create a virtual environment:
    ```bash
-   uv pip install -r requirements.txt
+   python -m venv .venv # For Windows
+   python3 -m venv .venv # For MacOS/Linux
    ```
-4. Rename file in the project directory `.env.example` to `.env` and set database path and default waiting time in the file:
-   ```bash
-   rename .env.example .env
-   ```
-5. Activate the virtual environment:
+4. Activate the virtual environment:
    ```bash
    .venv/Scripts/activate # For Windows
    source venv/bin/activate # For MacOS/Linux
    ```
+5. Install dependencies:
+   ```bash
+   uv pip install -r requirements.txt # For Windows
+   pip3 install -r requirements.txt # For MacOS/Linux
+   ```
+6. Rename file in the project directory `.env.example` to `.env` and set database path and default waiting time in the file:
+   ```bash
+   rename .env.example .env
+   ```
+7. Run the scraper:
+   ```bash
+   python main.py --help
+   ```
 
 ## Usage 🚦
+
+### Argument Groups
+Arguments are divided into two groups: `--scrape` and `--database`, as well as general options.
+
+### General Options (Optional and non exclusive)
+--help      Show options
+--version   Shows program version
+--verbose   Shows detailed information in time of execution
+--wait      Set random wait time, in secods, from 1 to input value. Default 5
+
+### Scrape arguments (Not available if database argument used)
+--scrape       Starts the execution of the scrape
+--all          Set all scrapes available
+--companies    Set company info as scope of the scrape
+--stock_values Set current stock values as scope of the scrape
+
+### Database arguments (Not available if scrape arguments used)
+--delete_file  Delete sqlite db file
+--delete_db    Delete all rows from all tables. Keeps file and table structure.
+--dump         Dumps db structure and data to dump.sql file
 
 1. Check the available options:
    ```bash
