@@ -1,4 +1,4 @@
-# BME Scraper 🚀
+# BME Scraper 📊
 Author: Fernando García Catalán ✍️
 
 Github: [https://github.com/fergarcat](https://github.com/fergarcat) 🌐
@@ -13,7 +13,7 @@ This is my second project during the AI Bootcamp at [https://github.com/Factoria
 
 ## Features ✨
 
-- Scrape companies and stock data from the BME website (https://www.bolsasymercados.es/). 📊
+- Scrape companies and stock data from the BME website (https://www.bolsasymercados.es/). 💻
 - Save data to local sqlite database. 💾
 - Configurable scraping options. ⚙️
 - Dump and deletion options for the database. 🗑️
