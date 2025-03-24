@@ -8,6 +8,7 @@ def argument_parser():
     parser = argparse.ArgumentParser(description='Scrape proyect for BME stock market website.\n\nYou may get all data from scratch or select the scope of the scrape.')
     parser.add_argument('-V', '--verbose', help="Show detailed output for each scrape.", action='store_true',default=False)
     parser.add_argument('-w', '--wait_time', help="Time to wait between requests.", type=int, default=wait_time)
+    parser.add_argument('-b', '--browser', help="Show driver browser.", type=bool, default=False)
     #Main group exclusive 
     main_option = parser.add_mutually_exclusive_group(required=True)
     main_option.add_argument('-scr','--scrape', help="Scrape data from the website.", action='store_true',default=False)
@@ -26,6 +27,9 @@ def argument_parser():
     return(parser.parse_args())
 
 def validate_arguments(arguments):
+    if not arguments.scrape and arguments.browser:
+        print("Browser option only available in scrape mode. Use -h for help")
+        exit()
     if arguments.scrape and not arguments.all and not arguments.companies and not arguments.stock_values:
         print("No scope selected for scrape. Use -h for help")
         exit()

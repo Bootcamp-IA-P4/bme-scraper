@@ -61,7 +61,8 @@ def main():
                 logger.info('START of scrape')
                 #Selenium Options
                 options = Options()
-                options.add_argument("--headless") #True: closed browser, False: opened browser
+                if not arguments.browser:
+                    options.add_argument("--headless") #True: closed browser, False: opened browser
                 options.add_argument("--lang=es")  #Set brwoser language to spanish
                 #Scrape companies
                 if arguments.all or arguments.companies: 
@@ -82,7 +83,7 @@ def main():
         logger.info('END of main program')
     except KeyboardInterrupt:
         print('\n>> Process interrupted by user !!!\n')
-        logger.info('KeyboardInterrupt')
+        logger.warning('Process interrupted by user')
         exit()
     except Exception as e:
         logger.error(f'Error: {e}')

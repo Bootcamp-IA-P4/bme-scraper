@@ -93,7 +93,7 @@ def save_company(company,connection):
         cursor.execute("SELECT COUNT(*) FROM company WHERE isin = ?", (company.isin,))
         result = cursor.fetchone()[0]
         if result > 0 and arguments.verbose:
-            print(f"Company {company.name} already exists in database")
+            print(f"\tCompany {company.name} already exists in database")
             return
         else: # Insert data
             cursor.execute("""
@@ -102,7 +102,7 @@ def save_company(company,connection):
             """, (company.name, company.isin, company.ticker, company.nominal, company.market, company.listed_capital, company.address))
             connection.commit()
             if arguments.verbose:
-                print(f"Company {company.name} saved in database")
+                print(f"\tCompany {company.name} saved in database")
     except Exception as e:
         logger.error(f"Error saving company: {e}")
         print(f"Error saving company: {e}")

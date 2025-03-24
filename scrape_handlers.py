@@ -56,8 +56,9 @@ def get_urls(driver):
     link_list = []
     try:
             if arguments.verbose:
-                print(">> Scraping links")
+                print(">> Scraping HREFS\n")
             for i in range(len(links)):
+                wait(wait_time) # Random sleep to avoid detection
                 if not arguments.verbose:
                     progress_bar(i+1, len(links),title="Scraping HREFS ")
                 # Get text and href
@@ -66,7 +67,7 @@ def get_urls(driver):
                 link = [link_text,link_href]
                 link_list.append(link)
                 if arguments.verbose:
-                    print(f"Link {i}: {link_text} - {link_href}")
+                    print(f"\tLink {i}: {link_text} - {link_href}")
             if arguments.verbose:
                 print("\n>> Scraping links finished\n")
     except Exception as e:
@@ -89,10 +90,10 @@ def view_all(driver):
         exit()
 
 def scrape_companies(driver):
-    if arguments.verbose:
-        print(">> Scraping companies")
     url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
     driver.get(url)
+    if arguments.verbose:
+        print(f">> Scraping companies from {url}")
     #Wait for page to load  completely
     wait(wait_time) # Random sleep to avoid detection 
     if arguments.verbose:
@@ -112,6 +113,8 @@ def scrape_companies(driver):
         save_company(scrape_company_data_by_id(driver),connection)
         driver.back()
         wait(wait_time) # Random sleep detection
+        if arguments.verbose:
+            print(f'>> Waiting {wait_time} seconds to avoid robot detection')
     connection.close()
     if arguments.verbose:
         print(f">> Finished scraping of {i+1} companies\n")
@@ -151,19 +154,19 @@ def scrape_company_data_by_id(driver):
     company_dict.get("Capital Admitido", None)
     )
     if arguments.verbose:
-        print(f'Company scrapped: {company}')
+        print(f'\tCompany scrapped: {company}')
     return company
 
 
 def scrape_stock_values(driver):
-    if arguments.verbose:
-        print(">> Scraping stock values <<")
     url = "https://www.bolsasymercados.es/bme-exchange/es/Mercados-y-Cotizaciones/Acciones/Mercado-Continuo/Precios/mercado-continuo"
     driver.get(url)
+    if arguments.verbose:
+        print(f">> Scraping stock values from {url} ")
     #Wait for page to load  completely
     wait(wait_time) # Random sleep to avoid detection
     if arguments.verbose:
-        print(f'>> Waiting {wait_time} seconds to avoid robot detection') 
+        print(f'>> Waiting time {wait_time} seconds to avoid robot detection') 
     accept_consent(driver)
     wait_for_body(driver)
     view_all(driver)
@@ -211,8 +214,6 @@ def scrape_stock_values(driver):
         # Save stock value to db
         save_stock_value(stock,connection)
         wait(wait_time) # Random sleep to avoid detection
-        if arguments.verbose:
-            print(f'>> Waiting {wait_time} seconds to avoid robot detection')
     connection.close()
     print(f">> Finished scraping of {i} stock values\n")
     logger.info(f"Finished scraping of {i} stock values")
