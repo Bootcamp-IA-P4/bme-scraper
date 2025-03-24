@@ -9,8 +9,8 @@ def argument_parser():
     #DB group exclusive
     database = parser.add_mutually_exclusive_group(required=False)
     database.add_argument('-du', '--dump', help="Dump database to file.", action='store_true',default=False)
-    #database.add_argument('-t', '--truncate', help="Truncate database tables.", action='store_true',default=False)
-    #database.add_argument('-D', '--delete', help="DELETE database file.", action='store_true',default=False)
+    database.add_argument('-delf', '--delete_file', help="DELETE database file.", action='store_true',default=False)
+    database.add_argument('-delbd', '--delete_db', help="Delete all rows from all tables.", action='store_true',default=False)
     #Scrape group exclusive
     scrape_group = parser.add_mutually_exclusive_group(required=False)
     scrape_group.add_argument('-v', '--version', action='version', version='%(prog)s 1.0')
@@ -23,7 +23,7 @@ def validate_arguments(arguments):
     if arguments.scrape and not arguments.all and not arguments.companies and not arguments.stock_values:
         print("No scope selected for scrape. Use -h for help")
         exit()
-    if arguments.database and not arguments.dump and not arguments.truncate and not arguments.delete:
+    if arguments.database and not arguments.dump and not arguments.delete_db and not arguments.delete_file:
         print("No action selected for database. Use -h for help")
         exit()
     return

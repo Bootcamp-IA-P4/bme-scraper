@@ -5,13 +5,15 @@ load_dotenv()
 from arguments import argument_parser
 arguments = argument_parser()
 import logging
+import os
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='myapp.log', level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",)
+DB_NAME = os.getenv("DB_NAME")
 
 def db_connect():
     # Connect to database
     try:
-        connection = sqlite3.connect(os.getenv("DB_NAME"))
+        connection = sqlite3.connect(DB_NAME)
         try:
             logger.info('Database connected')
             create_tables(connection)
@@ -104,8 +106,8 @@ def save_company(company,connection):
     except Exception as e:
         logger.error(f"Error saving company: {e}")
         print(f"Error saving company: {e}")
-        
-        
+        exit()
+           
 def save_stock_value(stock_value,connection):
     try:
         cursor = connection.cursor()
@@ -126,3 +128,38 @@ def save_stock_value(stock_value,connection):
     except Exception as e:
         logger.error(f"Error saving stock value: {e}")
         print(f"Error saving stock value: {e}")
+        exit()
+
+def db_delete(connection):
+    try:
+        while True:
+            if input(f"Type 'yes' to delete all rows from all tables at {DB_NAME}. CTRL+C to abort: ") == "yes":
+                cursor = connection.cursor()
+                cursor.execute("DELETE FROM company")
+                cursor.execute("DELETE FROM stock_value")
+                connection.commit()
+                print("Database deleted")
+                logger.info('Database deleted')
+                logger.warning('Database deleted')
+                exit()
+            else:
+                print("Wrong input!!!")
+    except Exception as e:
+        logger.error(f"Error deleting database: {e}")
+        print(f"Error deleting database: {e}")
+        exit()
+
+def db_file_delete(db_file):
+    try:
+        while True:
+            if input(f"Type 'yes' to delete file {db_file}. CTRL+C to abort: ") == "yes":
+                os.remove(db_file)
+                print(f"File {db_file} deleted")
+                logger.warning(f'File {db_file} deleted')
+                exit()
+            else:
+                print("Wrong input!!!")
+    except Exception as e:
+        logger.error(f"Error deleting file {db_file}: {e}")
+        print(f"Error deleting file dump.sql: {e}")
+        exit()
