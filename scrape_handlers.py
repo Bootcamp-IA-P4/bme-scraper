@@ -104,7 +104,7 @@ def scrape_companies(driver):
     connection = db_connect()
     for i in range(len(links)):
         if not arguments.verbose:
-            progress_bar(i+1, len(links),title="Scraping companies ")
+            progress_bar(i+1, len(links),title="Scraping company data ")
         url = links[i][1]
         driver.get(url)
         save_company(scrape_company_data_by_id(driver),connection)
