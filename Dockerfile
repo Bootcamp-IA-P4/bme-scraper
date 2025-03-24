@@ -73,4 +73,4 @@ EXPOSE 8000
 USER root
 
 # Set the default command to run the application and keep the container running
-CMD ["sh", "-c", "python main.py --scrape --all || echo 'Script failed, keeping container alive' && tail -f /dev/null"]
+CMD ["sh", "-c", "python main.py --scrape --all --wait 5 || echo 'Script failed, keeping container alive' && tail -f /dev/null"]
