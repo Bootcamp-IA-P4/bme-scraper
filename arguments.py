@@ -13,7 +13,7 @@ def argument_parser():
     #Main group exclusive 
     main_option = parser.add_mutually_exclusive_group(required=True)
     main_option.add_argument('-scr','--scrape', help="Scrape data from the website.", action='store_true',default=False)
-    main_option.add_argument('-db','--database', help="Scrape data from the website.", action='store_true',default=False)
+    main_option.add_argument('-db','--database', help="Manage db options.", action='store_true',default=False)
     #DB group exclusive
     database = parser.add_mutually_exclusive_group(required=False)
     database.add_argument('-du', '--dump', help="Dump database to file.", action='store_true',default=False)
