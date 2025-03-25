@@ -65,19 +65,29 @@ Arguments are divided into two groups: `--scrape` and `--database`, as well as g
 
 ### General Options (Optional and non exclusive)
 --help      Show options
+
 --version   Shows program version
+
 --verbose   Shows detailed information in time of execution
+
 --wait      Set random wait time, in secods, from 1 to input value. Default 5
+
 
 ### Scrape arguments (Not available if database argument used)
 --scrape       Starts the execution of the scrape
+
 --all          Set all scrapes available
+
 --companies    Set company info as scope of the scrape
+
 --stock_values Set current stock values as scope of the scrape
+
 
 ### Database arguments (Not available if scrape arguments used)
 --delete_file  Delete sqlite db file
+
 --delete_db    Delete all rows from all tables. Keeps file and table structure.
+
 --dump         Dumps db structure and data to dump.sql file
 
 1. Check the available options:
@@ -123,6 +133,9 @@ Cronjob is set to run the scraper every day from Monday to Friday between 8:00-2
    SELECT * FROM companies;
    SELECT * FROM stock_values;
    ```
+## Logging 📜
+All process events are saved into myapp.log
+
 ## Contributing 🤝
 
 Contributions are welcome! Please fork the repository and submit a pull request.
